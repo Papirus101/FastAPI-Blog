@@ -1,0 +1,3 @@
+CREATE DATABASE test_db;
+CREATE USER test_user WITH PASSWORD 'test_pass';
+GRANT ALL PRIVILEGES ON DATABASE test_db TO test_user;

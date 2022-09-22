@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  redis-user:
+    image: redis
+    container_name: redis
+    restart: unless-stopped
+    expose:
+      - 6379
+
+  db:
+    image: postgres
+    container_name: db_user
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - .:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5434"
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+    container_name: user-service
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis-user
+    depends_on:
+      - postgres
+      - redis
+    command: uvicorn --host 0.0.0.0 app:app 
+
