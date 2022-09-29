@@ -3,6 +3,7 @@ from sqlalchemy import select, update, delete
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
 from db.models.user import User
+from exceptions.db_exc import FieldAlredyExist, NotFoundException
 
 
 async def insert_new_client(db_session, **kwargs):
@@ -11,7 +12,7 @@ async def insert_new_client(db_session, **kwargs):
         db_session.add(new_client)
         await db_session.commit()
     except IntegrityError:
-        raise HTTPException(400, 'Email or login alredy exists')
+        raise FieldAlredyExist
 
 
 async def get_user_by_login(db_session, user_login: str):
@@ -20,7 +21,7 @@ async def get_user_by_login(db_session, user_login: str):
         data = await db_session.execute(sql)
         data = data.one()
     except NoResultFound:
-        raise HTTPException(404, 'User not found')
+        raise NotFoundException
     return data
 
 
@@ -30,7 +31,7 @@ async def update_user_data(db_session, user_login: str, **kwargs):
         await db_session.execute(sql)
         await db_session.commit()
     except IntegrityError:
-        raise HTTPException(400, 'Email or login alredy exists')
+        raise FieldAlredyExist
 
 async def delete_user(db_session, user_login: str):
     sql = delete(User).where(User.login == user_login)

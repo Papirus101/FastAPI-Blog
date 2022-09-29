@@ -10,7 +10,6 @@ from load_config import db_config, DB
 
 config: DB = db_config()
  
-print(config)
 engine = create_async_engine(ASYNC_DB_LINK.format(
     db_user=config.user,
     db_pass=config.password,
