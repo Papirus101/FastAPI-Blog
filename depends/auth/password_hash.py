@@ -1,27 +1,23 @@
 import hashlib
-import os
 
-from dotenv import load_dotenv
-
-load_dotenv('.env')
-
+from load_config import password_config, Password
 
 def hash_password_sync(password: str):
-    print(os.getenv('PASSWORD_ALGORITHM'))
+    config: Password = password_config()
     enc = hashlib.pbkdf2_hmac(
-            f"{os.getenv('PASSWORD_ALGORITHM')}",
+            config.PASS_ALGORITHM,
             password.encode(),
-            os.getenv('SALT').encode(),
+            config.PASS_SALT.encode(),
             100_000)
     return enc.hex()
 
 
 async def hash_password(password: str):
-    print(os.getenv('PASSWORD_ALGORITHM'))
+    config: Password = password_config()
     enc = hashlib.pbkdf2_hmac(
-            f"{os.getenv('PASSWORD_ALGORITHM')}",
+            config.PASS_ALGORITHM,
             password.encode(),
-            os.getenv('SALT').encode(),
+            config.PASS_SALT.encode(),
             100_000)
     return enc.hex()
 
