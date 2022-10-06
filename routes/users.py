@@ -1,15 +1,15 @@
 import settings
 import json
 
-from fastapi import APIRouter, Response, HTTPException, Body, Depends, Request
+from fastapi import APIRouter, Response, HTTPException, Body, Depends
 from db.queries.users import get_user_by_login, insert_new_client, update_user_data
 
 from depends.auth.jwt_bearer import OAuth2PasswordBearerCookie
 from depends.auth.password_hash import hash_password, validate_password
 from depends.auth.jwt_handler import signJWT, get_login_by_token
 from db.session import get_session
-from models.user_model import TokenScheme, UserBaseScheme, UserLoginScheme, UserRegisterScheme, UserUpdateSheme
-from utils.utils import get_redis, get_user_token
+from models.user_model import TokenScheme, UserLoginScheme, UserRegisterScheme, UserUpdateSheme
+from utils.utils import get_redis
 
 users_router = APIRouter(
         prefix='/user',
@@ -42,28 +42,26 @@ async def user_login(response: Response, user: UserLoginScheme = Body(),
 
 
 @users_router.patch('/update_user', status_code=200, dependencies=[Depends(OAuth2PasswordBearerCookie())])
-async def user_update_data(request: Request, response: Response, user: UserUpdateSheme = Body(),
-        db_session = Depends(get_session), redis = Depends(get_redis)):
-    user_data = {k:v for k, v in user.__dict__.items() if v is not None}
-    if 'password' in user_data:
-        user_data['password'] = await hash_password(user_data['password'])
-    user_token = get_user_token(request)
-    user_login = await get_login_by_token(user_token)
-    await update_user_data(db_session, user_login, **user_data)
-    await redis.delete(user_login)
-    if 'login' in user_data:
-        user_token = await signJWT(user_data['login'])
+async def user_update_data(response: Response, user: UserUpdateSheme = Body(),
+        db_session = Depends(get_session), redis = Depends(get_redis),
+        user_info: dict = Depends(get_login_by_token)):
+    user_update_data = {k:v for k, v in user.__dict__.items() if v is not None}
+    if 'password' in user_update_data:
+        user_update_data['password'] = await hash_password(user_update_data['password'])
+    await update_user_data(db_session, user_info['login'], **user_update_data)
+    await redis.delete(user_info['login'])
+    if 'login' in user_update_data:
+        user_token = await signJWT(user_update_data['login'])
         user_token = user_token['access_token']
         if settings.AUTH_TYPE == 'cookie':
             response.set_cookie('Authorization', f"Bearer {user_token}")
-    return {'Authorization': f"Bearer {user_token}"}
+    return {'Authorization': f"Bearer {user_info['token']}"}
 
 
 @users_router.get('/get_user', status_code=200, dependencies=[Depends(OAuth2PasswordBearerCookie())])
-async def get_user(request: Request, redis = Depends(get_redis),
-        session = Depends(get_session)):
-    user_token = get_user_token(request)
-    user_login = await get_login_by_token(user_token)
+async def get_user(redis = Depends(get_redis),
+        session = Depends(get_session), user_info: dict = Depends(get_login_by_token)):
+    user_login = user_info['login']
     cache = await redis.get(user_login)
     if cache is not None:
         return json.loads(cache)

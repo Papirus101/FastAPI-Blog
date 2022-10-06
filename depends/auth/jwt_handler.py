@@ -1,13 +1,10 @@
 import time
-import os
-from fastapi import HTTPException
+from fastapi import Depends, HTTPException
 
 import jwt
-from jwt.algorithms import get_default_algorithms
-
-from db.queries.users import get_user_by_login
 
 from load_config import auth_config, Auth
+from utils.utils import get_user_token
 
 
 async def token_response(token: str, expires: int) -> dict:
@@ -38,18 +35,11 @@ async def decodeJWT(token: str) -> str | None:
     return decode_token if decode_token['expires'] >= time.time() else None
 
 
-async def get_user_by_token(token, db_session):
-    user_login = await get_login_by_token(token)
-    return await get_user_by_login(db_session, user_login)
-
-
-async def get_login_by_token(token: str) -> str:
+async def get_login_by_token(token: str = Depends(get_user_token)) -> dict:
     config: Auth = auth_config()
-    if isinstance(token, list):
-        token = token[1]
     token = token.encode('utf-8')
     decode_token = jwt.decode(token, config.JWT_SECRET, config.JWT_ALGORITHM)
     if decode_token.get('user_info') is None:
         raise HTTPException(403)
-    return decode_token['user_info']
+    return {'token': token, 'login': decode_token['user_info']}
 
