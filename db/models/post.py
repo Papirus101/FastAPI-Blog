@@ -16,15 +16,3 @@ class Post(Base):
     
     author = relationship('User', backref=backref('posts'), lazy='joined')
     
-
-class Comment(Base):
-    __tablename__ = 'comments'
-    
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    body = Column(VARCHAR(150), nullable=False)
-    post_id = Column(ForeignKey('posts.id', ondelete='CASCADE'), nullable=False)
-    author_id = Column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
-    parrent_comment_id = Column(ForeignKey('comments.id', ondelete='CASCADE'), nullable=True)
-    likes = Column(Integer, default=0)
-    
-    replies = relationship('Comment', backref=backref('replies_comment', remote_side=[id]), lazy='dynamic')

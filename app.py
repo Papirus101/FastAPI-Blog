@@ -7,6 +7,7 @@ from utils.bot import send_telegram_error
 
 from routes.users import users_router
 from routes.posts import posts_router
+from routes.comments import comments_router
 
 app = FastAPI(
         docs_url='/api/docs',
@@ -35,3 +36,4 @@ async def catch_exceptions_middleware(request: Request, call_next):
 
 app.include_router(users_router, prefix='/api')
 app.include_router(posts_router, prefix='/api')
+app.include_router(comments_router, prefix='/api')
