@@ -1,10 +1,12 @@
 import time
-from fastapi import Depends, HTTPException
-
 import jwt
+import json
 
+from fastapi import Depends, HTTPException
+from db.queries.users import get_user_by_login
+from db.session import get_session
 from load_config import auth_config, Auth
-from utils.utils import get_user_token
+from utils.utils import get_redis, get_user_token
 
 
 async def token_response(token: str, expires: int) -> dict:
@@ -43,3 +45,17 @@ async def get_login_by_token(token: str = Depends(get_user_token)) -> dict:
         raise HTTPException(403)
     return {'token': token, 'login': decode_token['user_info']}
 
+
+async def get_user(
+    db_session = Depends(get_session),
+    user_info: dict = Depends(get_login_by_token),
+    redis = Depends(get_redis)
+                   ):
+    cache = await redis.get(user_info['login'])
+    if cache is not None:
+        return json.loads(cache)
+    user = await get_user_by_login(db_session, user_info['login'])
+    user = dict(user)
+    del user['password']
+    await redis.set(user_info['login'], json.dumps(dict(user)))
+    return user

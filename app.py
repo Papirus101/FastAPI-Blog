@@ -1,6 +1,7 @@
 import traceback
 
 from fastapi import FastAPI, Response, Request
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from utils.bot import send_telegram_error
 
@@ -11,6 +12,8 @@ app = FastAPI(
         redoc_url='/api/redoc',
         openapi_url='/api/openapi.json'
         )
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.add_middleware(
     CORSMiddleware,
