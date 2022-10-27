@@ -16,7 +16,7 @@ async def insert_new_client(db_session, **kwargs):
 
 
 async def get_user_by_login(db_session, user_login: str):
-    sql = select(User.login, User.email, User.password, User.avatar).where(User.login == user_login)
+    sql = select(User.id, User.login, User.email, User.password, User.avatar).where(User.login == user_login)
     try:
         data = await db_session.execute(sql)
         data = data.one()

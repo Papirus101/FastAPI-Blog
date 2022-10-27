@@ -1,3 +1,4 @@
+from email import message
 from fastapi import HTTPException, Response
 
 
@@ -15,3 +16,11 @@ class FieldAlredyExist(Exception):
         self.message = message
         super().__init__(self.message)
         raise HTTPException(400, message)
+
+
+class NotOwnerException(Exception):
+    
+    def __init__(self, event: str ='post'):
+        self.message = f'User not owner {event}'
+        super().__init__(message)
+        raise HTTPException(403, self.message)

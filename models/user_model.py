@@ -4,7 +4,10 @@ from pydantic import BaseModel, EmailStr
 class UserBaseScheme(BaseModel):
     email: EmailStr
     login: str
+    avatar: str
 
+    class Config:
+        orm_mode = True
 
 class UserRegisterScheme(UserBaseScheme):
     password: str

@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from utils.bot import send_telegram_error
 
 from routes.users import users_router
+from routes.posts import posts_router
 
 app = FastAPI(
         docs_url='/api/docs',
@@ -33,3 +34,4 @@ async def catch_exceptions_middleware(request: Request, call_next):
 # app.middleware('http')(catch_exceptions_middleware)
 
 app.include_router(users_router, prefix='/api')
+app.include_router(posts_router, prefix='/api')

@@ -3,6 +3,7 @@ import os
 
 from db.base import Base
 from sqlalchemy import Boolean, Column, Integer, VARCHAR, event
+from sqlalchemy.orm import relationship
 
 from depends.auth.password_hash import hash_password_sync
 

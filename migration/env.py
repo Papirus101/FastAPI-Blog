@@ -6,6 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from db.models.user import User
+from db.models.post import Post, Comment
 from load_config import db_config, DB
 from settings import SYNC_DB_LINK
 
