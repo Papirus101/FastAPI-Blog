@@ -27,3 +27,4 @@ pyrightconfig.json
 test_client_wrc.py
 
 static/images/avatar/1*
+static/images/posts/*

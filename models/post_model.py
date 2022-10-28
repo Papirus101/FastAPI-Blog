@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import json
 from datetime import datetime
 from typing import List
 from pydantic import BaseModel
@@ -31,14 +31,33 @@ class CreatePostScheme(BaseModel):
     body: str
     category_id: int
     
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate_to_json
+
+    @classmethod
+    def validate_to_json(cls, value):
+        if isinstance(value, str):
+            return cls(**json.loads(value))
+        return value
+    
+    
+class ImagesPostSheme(BaseModel):
+    photo: str
+    
+    class Config:
+        orm_mode = True
+    
     
 class ViewPostScheme(BaseModel):
+    id: int
     title: str
     category: CategoryShortViewSheme
     body: str
     author: UserBaseScheme
     likes: int
     created_at: datetime
+    images: List[ImagesPostSheme]
     
     class Config:
         orm_mode = True

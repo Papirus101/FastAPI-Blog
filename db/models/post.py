@@ -16,6 +16,15 @@ class Post(Base):
     
     author = relationship('User', backref=backref('posts'), lazy='joined')
     category = relationship('Category', backref=backref('posts'), lazy='joined')
+    images = relationship('PostPhoto', backref=backref('post'), lazy='joined')
+    
+    
+class PostPhoto(Base):
+    __tablename__ = 'post_photo'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    photo = Column(VARCHAR, nullable=False)
+    post_id = Column(ForeignKey('posts.id', ondelete='CASCADE'), nullable=False)
     
     
 class Category(Base):
