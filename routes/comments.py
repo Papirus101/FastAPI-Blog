@@ -17,7 +17,8 @@ async def create_new_comment(session = Depends(get_session), user = Depends(get_
         await create_comment(session, user['id'], **dict(comment))
         
         
-@comments_router.get('/get_comments_post', response_model=ListCommentsScheme, status_code=200, dependencies=[Depends(OAuth2PasswordBearerCookie())])
+@comments_router.get('/get_comments_post', response_model=ListCommentsScheme, status_code=200, dependencies=[Depends(OAuth2PasswordBearerCookie())],
+                     responses={404: {}})
 async def post_comments(post_id: int, session = Depends(get_session)):
         comments = await get_comments(session, post_id)
         if not comments:

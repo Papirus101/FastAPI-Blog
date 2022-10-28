@@ -1,4 +1,4 @@
-from db.models.post import Post
+from db.models.post import Category, Post
 from sqlalchemy import select, update
 from sqlalchemy.exc import NoResultFound
 from db.models.user import User
@@ -45,4 +45,42 @@ async def update_post(db_session, post_id: int, user_id: int, **kwargs):
         raise NotOwnerException
     sql = update(Post).values(**kwargs).where(Post.id == post_id)
     await db_session.execute(sql)
+    await db_session.commit()
+    
+    
+async def get_children_categories(db_session, category):
+    child_list = []
+    childs = await db_session.execute(category[0].children_categories)
+    for category in childs:
+        child_list.append(
+            {
+                'name': category[0].name,
+                'id': category[0].id,
+                'children_categories': await get_children_categories(db_session, category)
+            }
+        )
+    return child_list if child_list else None
+    
+    
+async def get_all_categories(db_session):
+    sql = select(Category).where(Category.parrent_category_id == None)
+    data = await db_session.execute(sql)
+    categories = data.unique()
+    if not categories:
+        raise NotFoundException('Categories was not found')
+    categories_list = []
+    for category in categories:
+        categories_list.append(
+            {
+                'name': category[0].name,
+                'id': category[0].id,
+                'children_categories': await get_children_categories(db_session, category)
+            }
+        )
+    return categories_list
+
+
+async def insert_category(db_session, name: str, parrent_category: int | None = None):
+    new_category = Category(name=name, parrent_category_id=parrent_category)
+    db_session.add(new_category)
     await db_session.commit()
