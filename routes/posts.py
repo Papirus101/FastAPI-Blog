@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Body, Depends, UploadFile, HTTPException
-from db.queries.posts import add_post_images, create_post, get_all_categories, get_all_posts, get_post_by_id, insert_category, update_post
+from fastapi import APIRouter, Body, Depends, UploadFile
+from db.queries.posts import add_post_images, create_post, get_all_categories, get_all_posts, get_post_by_id, insert_category, like_post_by_id, update_post
 from db.session import get_session
 from depends.auth.jwt_handler import get_user
 
@@ -26,6 +26,7 @@ async def user_signup(
 @posts_router.get('/get_post', status_code=200, response_model=ViewPostScheme)
 async def get_post(post_id: int, session = Depends(get_session)):
     post = await get_post_by_id(session, post_id)
+    print(post)
     return post
 
 
@@ -42,6 +43,11 @@ async def update_user_post(session = Depends(get_session), user = Depends(get_us
     await update_post(session, post_id, user['id'], **params)
     post = await get_post_by_id(session, post_id)
     return post
+
+@posts_router.post('/like', status_code=200)
+async def like_post(post_id: int, session = Depends(get_session), user = Depends(get_user)):
+    await like_post_by_id(session, post_id, user['id'])
+    
 
 
 @posts_router.get('/get_categories', status_code=200, response_model=ListCategoriesScheme)

@@ -3,13 +3,21 @@ from db.base import Base
 from sqlalchemy import Column, Integer, VARCHAR, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship, backref
 
+
+class UserPostsLikes(Base):
+    __tablename__ = 'posts_likes'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    post_id = Column(ForeignKey('posts.id', ondelete='CASCADE'), nullable=False)
+
+
 class Post(Base):
     __tablename__ = 'posts'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(VARCHAR(50), nullable=False)
     body = Column(VARCHAR, nullable=False)
-    likes = Column(Integer, default=0)
     created_at = Column(DateTime, server_default=func.now())
     author_id = Column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     category_id = Column(ForeignKey('categories.id', ondelete='CASCADE'), nullable=False)
@@ -17,6 +25,7 @@ class Post(Base):
     author = relationship('User', backref=backref('posts'), lazy='joined')
     category = relationship('Category', backref=backref('posts'), lazy='joined')
     images = relationship('PostPhoto', backref=backref('post'), lazy='joined')
+    likes = relationship('User', secondary=UserPostsLikes.__tablename__, backref='post', lazy='joined')
     
     
 class PostPhoto(Base):

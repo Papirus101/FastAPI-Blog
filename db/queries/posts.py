@@ -1,5 +1,5 @@
-from db.models.post import Category, Post, PostPhoto
-from sqlalchemy import select, update, desc
+from db.models.post import Category, Post, PostPhoto, UserPostsLikes
+from sqlalchemy import select, update, insert, desc
 from sqlalchemy.exc import NoResultFound
 from db.models.user import User
 
@@ -14,6 +14,8 @@ async def create_post(db_session, author_id: int, **kwargs):
 
 
 async def add_post_images(db_session, images: list, post_id: int, category_id: int):
+    if not images:
+        return
     for image in images:
         photo_pass = await write_post_image(image, category_id)
         db_session.add(PostPhoto(post_id=post_id, photo=photo_pass))
@@ -95,4 +97,10 @@ async def get_all_categories(db_session):
 async def insert_category(db_session, name: str, parrent_category: int | None = None):
     new_category = Category(name=name, parrent_category_id=parrent_category)
     db_session.add(new_category)
+    await db_session.commit()
+    
+    
+async def like_post_by_id(db_session, post_id: int, user_id: int):
+    sql = UserPostsLikes(user_id=user_id, post_id=post_id)
+    db_session.add(sql)
     await db_session.commit()

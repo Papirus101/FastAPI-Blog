@@ -15,7 +15,7 @@ class User(Base):
     email = Column(VARCHAR, unique=True)
     login = Column(VARCHAR, unique=True)
     password = Column(VARCHAR)
-    avatar = Column(VARCHAR, nullable=False, default='/static/images/avatar/default_avatar.png', server_default='/static/images/avatar/default_avatar.png')
+    avatar = Column(VARCHAR, nullable=True, default='/static/images/avatar/default_avatar.png', server_default='/static/images/avatar/default_avatar.png')
     
     is_admin = Column(Boolean, default=False)
 

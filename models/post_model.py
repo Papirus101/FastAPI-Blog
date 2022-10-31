@@ -3,11 +3,11 @@ import json
 from datetime import datetime
 from typing import List
 from pydantic import BaseModel
-from models.user_model import UserBaseScheme
+from models.user_model import UserBaseScheme, UserShortSheme
     
 class CreateCategorySheme(BaseModel):
     name: str
-    parrent_category: int
+    parrent_category: int | None
     
 
 class CategoryShortViewSheme(BaseModel):
@@ -55,7 +55,7 @@ class ViewPostScheme(BaseModel):
     category: CategoryShortViewSheme
     body: str
     author: UserBaseScheme
-    likes: int
+    likes: List[UserShortSheme]
     created_at: datetime
     images: List[ImagesPostSheme]
     
@@ -68,7 +68,7 @@ class ShortPostSheme(BaseModel):
     title: str
     category: CategoryShortViewSheme
     author: UserBaseScheme
-    likes: int
+    likes: List[UserShortSheme]
     created_at: datetime
     
     class Config:
