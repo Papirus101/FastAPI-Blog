@@ -1,4 +1,4 @@
-from db.models.comments import Comment
+from db.models.comments import Comment, CommentsUsersLikes
 
 from sqlalchemy import select, update, delete, desc
 from sqlalchemy.exc import NoResultFound
@@ -84,4 +84,10 @@ async def delete_comment(db_session, comment_id: int, user_id: int):
         raise NotOwnerException('comment')
     sql = delete(Comment).where(Comment.id == comment_id)
     await db_session.execute(sql)
+    await db_session.commit()
+    
+    
+async def like_comment_by_id(db_session, comment_id: int, user_id: int):
+    new_like = CommentsUsersLikes(comment_id=comment_id, user_id=user_id)
+    db_session.add(new_like)
     await db_session.commit()
